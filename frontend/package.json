@@ -12,6 +12,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
   "dependencies": {
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",

@@ -169,8 +169,37 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 NEXT_PUBLIC_BACKEND_URL=https://your-backend-app.herokuapp.com
 ```
 
+### Buildpacks
+
+**Backend (Python):**
+- Buildpack: `heroku/python`
+- Configuration: `backend/.buildpacks`
+- Runtime: Python 3.11.9 (specified in `runtime.txt`)
+
+**Frontend (Node.js):**
+- Buildpack: `heroku/nodejs` 
+- Node version: 18.x (specified in `package.json` engines and `.nvmrc`)
+- NPM version: 9.x
+
 ### Deployment Files
 
 - `backend/Procfile` - Heroku process configuration
-- `backend/runtime.txt` - Python version specification
-- `heroku-deploy.sh` - Automated deployment script
+- `backend/runtime.txt` - Python version specification  
+- `backend/.buildpacks` - Python buildpack specification
+- `frontend/.nvmrc` - Node.js version for Heroku
+- `frontend/package.json` - Node.js engines specification
+- `heroku-deploy.sh` - Automated deployment script with buildpack setup
+
+### Manual Buildpack Setup
+
+If you need to set buildpacks manually:
+
+**Backend:**
+```bash
+heroku buildpacks:set heroku/python --app your-backend-app
+```
+
+**Frontend:**
+```bash  
+heroku buildpacks:set heroku/nodejs --app your-frontend-app
+```

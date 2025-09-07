@@ -40,6 +40,10 @@ cd backend
 echo "Creating Heroku app: $BACKEND_APP"
 heroku create $BACKEND_APP
 
+# Set buildpack for Python
+echo "Setting Python buildpack..."
+heroku buildpacks:set heroku/python --app $BACKEND_APP
+
 # Set environment variables
 echo "⚙️  Please set your Google Client ID:"
 read -p "Enter your GOOGLE_CLIENT_ID: " GOOGLE_CLIENT_ID
@@ -58,24 +62,75 @@ git push heroku main
 
 cd ..
 
+cd ..
+
 echo ""
 echo "🌐 Backend deployed to: https://$BACKEND_APP.herokuapp.com"
 echo ""
-echo "📋 Next Steps:"
-echo "=============="
+
+# Ask if user wants to deploy frontend to Heroku too
+echo "🤔 Frontend Deployment Options:"
+echo "================================"
+echo "1. Deploy to Heroku (Node.js app)"
+echo "2. Deploy to Vercel (recommended for Next.js)"
+echo ""
+read -p "Choose option (1 or 2): " DEPLOY_CHOICE
+
+if [[ "$DEPLOY_CHOICE" == "1" ]]; then
+    echo ""
+    echo "🔧 Deploying Frontend to Heroku..."
+    echo "=================================="
+    
+    cd frontend
+    
+    # Create Heroku app for frontend
+    echo "Creating Heroku app: $FRONTEND_APP"
+    heroku create $FRONTEND_APP
+    
+    # Set buildpack for Node.js
+    echo "Setting Node.js buildpack..."
+    heroku buildpacks:set heroku/nodejs --app $FRONTEND_APP
+    
+    # Set environment variables
+    heroku config:set NEXT_PUBLIC_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" --app $FRONTEND_APP
+    heroku config:set NEXT_PUBLIC_BACKEND_URL="https://$BACKEND_APP.herokuapp.com" --app $FRONTEND_APP
+    
+    # Deploy frontend
+    echo "🚀 Deploying frontend..."
+    git init
+    git add .
+    git commit -m "Initial frontend deployment"
+    heroku git:remote -a $FRONTEND_APP
+    git push heroku main
+    
+    cd ..
+    
+    FRONTEND_URL="https://$FRONTEND_APP.herokuapp.com"
+else
+    FRONTEND_URL="https://$FRONTEND_APP.vercel.app"
+    echo ""
+    echo "📋 Manual Vercel Deployment Steps:"
+    echo "================================="
+    echo "1. Install Vercel CLI: npm i -g vercel"
+    echo "2. cd frontend"
+    echo "3. vercel"
+    echo "4. Set environment variables in Vercel dashboard:"
+    echo "   NEXT_PUBLIC_GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID"
+    echo "   NEXT_PUBLIC_BACKEND_URL=https://$BACKEND_APP.herokuapp.com"
+fi
+
+echo ""
+echo "📋 Final Steps:"
+echo "==============="
 echo "1. Update your Google OAuth settings:"
 echo "   - Go to Google Cloud Console"
-echo "   - Add https://$FRONTEND_APP.vercel.app to authorized origins"
+echo "   - Add $FRONTEND_URL to authorized origins"
 echo ""
-echo "2. Deploy your frontend to Vercel:"
-echo "   - Install Vercel CLI: npm i -g vercel"
-echo "   - cd frontend"
-echo "   - vercel"
-echo "   - Set environment variables in Vercel dashboard:"
-echo "     NEXT_PUBLIC_GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID"
-echo "     NEXT_PUBLIC_BACKEND_URL=https://$BACKEND_APP.herokuapp.com"
+echo "2. Update backend CORS settings:"
+echo "   heroku config:set ALLOWED_ORIGINS=\"http://localhost:3000,$FRONTEND_URL\" --app $BACKEND_APP"
 echo ""
-echo "3. Update backend CORS settings:"
-echo "   heroku config:set ALLOWED_ORIGINS=\"http://localhost:3000,https://localhost:3000,https://$FRONTEND_APP.vercel.app\" --app $BACKEND_APP"
+echo "🌐 URLs:"
+echo "  Backend:  https://$BACKEND_APP.herokuapp.com"
+echo "  Frontend: $FRONTEND_URL"
 echo ""
 echo "✅ Deployment complete!"
