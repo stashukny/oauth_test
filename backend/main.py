@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from google.auth.transport import requests
 from google.oauth2 import id_token
 import google.auth.exceptions
@@ -27,7 +28,12 @@ app.add_middleware(
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
-@app.get("/")
+# Mount static files for serving the built frontend
+static_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "out")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+@app.get("/api")
 def read_root():
     return {"message": "OAuth Backend API"}
 
