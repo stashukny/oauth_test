@@ -52,15 +52,22 @@ if [[ -n "$GOOGLE_CLIENT_ID" ]]; then
     heroku config:set GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" --app $BACKEND_APP
 fi
 
-# Deploy backend
+# Deploy backend using git subtree
 echo "🚀 Deploying backend..."
-git init
-git add .
-git commit -m "Initial backend deployment"
-heroku git:remote -a $BACKEND_APP
-git push heroku main
-
 cd ..
+
+# Initialize git repo if not already done
+if [ ! -d .git ]; then
+    git init
+    git add .
+    git commit -m "Initial commit"
+fi
+
+# Add Heroku remote for backend
+heroku git:remote -a $BACKEND_APP -r backend
+
+# Deploy only the backend subdirectory  
+git subtree push --prefix=backend backend main
 
 cd ..
 
@@ -95,13 +102,22 @@ if [[ "$DEPLOY_CHOICE" == "1" ]]; then
     heroku config:set NEXT_PUBLIC_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" --app $FRONTEND_APP
     heroku config:set NEXT_PUBLIC_BACKEND_URL="https://$BACKEND_APP.herokuapp.com" --app $FRONTEND_APP
     
-    # Deploy frontend
+    # Deploy frontend using git subtree
     echo "🚀 Deploying frontend..."
-    git init
-    git add .
-    git commit -m "Initial frontend deployment"
-    heroku git:remote -a $FRONTEND_APP
-    git push heroku main
+    cd ..
+    
+    # Initialize git repo if not already done
+    if [ ! -d .git ]; then
+        git init
+        git add .
+        git commit -m "Initial commit"
+    fi
+    
+    # Add Heroku remote for frontend
+    heroku git:remote -a $FRONTEND_APP -r frontend
+    
+    # Deploy only the frontend subdirectory
+    git subtree push --prefix=frontend frontend main
     
     cd ..
     

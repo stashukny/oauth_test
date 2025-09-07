@@ -203,3 +203,35 @@ heroku buildpacks:set heroku/python --app your-backend-app
 ```bash  
 heroku buildpacks:set heroku/nodejs --app your-frontend-app
 ```
+
+### Monorepo Deployment
+
+Since this is a monorepo structure, you need to deploy each app from its respective subdirectory:
+
+**Option 1: Using Git Subtree (Recommended - handled by script)**
+```bash
+# Backend
+git subtree push --prefix=backend heroku main
+
+# Frontend  
+git subtree push --prefix=frontend heroku main
+```
+
+**Option 2: Manual Directory Deployment**
+```bash
+# Backend
+cd backend
+git init
+git add .
+git commit -m "Backend deployment"
+heroku git:remote -a your-backend-app
+git push heroku main
+
+# Frontend
+cd frontend  
+git init
+git add .
+git commit -m "Frontend deployment" 
+heroku git:remote -a your-frontend-app
+git push heroku main
+```
